@@ -14,7 +14,7 @@ struct Args {
     #[arg(short, action = ArgAction::Count)]
     verbosity: u8,
 
-    /// Path to authorized_keys file (eg. ./authorized_keys). This file must exist and be writable. 
+    /// Path to authorized_keys file (eg. ./authorized_keys). This file must exist and be writable.
     ///
     /// If not specified, an upward search for the closest available `.ssh/authorized_keys` file
     /// will be performed from the current working directory.
