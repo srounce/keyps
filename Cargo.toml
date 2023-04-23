@@ -1,0 +1,17 @@
+[package]
+name = "keyps"
+description = "Provision authorized_keys file via HTTP/GitHub/GitLab"
+version = "0.1.0"
+edition = "2021"
+
+
+[dependencies]
+clap = { version = "4", features = ["derive", "env", "wrap_help"] }
+thiserror = "1"
+reqwest = { version = "0.11.11", features = ["json", "blocking"] }
+url = "2.2"
+log = "0.4.17"
+env_logger = "0.10.0"
+signal-hook = "0.3.15"
+itertools = "0.10.5"
+
