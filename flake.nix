@@ -1,21 +1,19 @@
 {
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs";
-    flake-utils.url = "github:numtide/flake-utils";
+    flake-parts.url = "github:hercules-ci/flake-parts";
+    flake-parts.inputs.nixpkgs-lib.follows = "nixpkgs";
     rust-overlay.url = "github:oxalica/rust-overlay";
+    rust-overlay.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = { nixpkgs, flake-utils, rust-overlay, ... }:
-    flake-utils.lib.eachDefaultSystem (system:
+  outputs = inputs@{ flake-parts, nixpkgs, rust-overlay, ... }:
+  flake-parts.lib.mkFlake { inherit inputs; } {
+    systems = [ "x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin" ];
+    perSystem = { system, pkgs, ... }:
       let
-        pkgs = import nixpkgs { inherit system overlays; };
-
         lib = pkgs.lib;
         stdenv = pkgs.stdenv;
-
-        apple_sdk = pkgs.darwin.apple_sdk;
-
-        overlays = [ (import rust-overlay) ];
 
         rustVersion = pkgs.rust-bin.stable.latest.default.override {
           extensions = [ "rust-src" "rustfmt" "rust-analyzer" ];
@@ -32,14 +30,12 @@
 
         buildInputs = [
           pkgs.openssl
-        ] ++ lib.optionals stdenv.isDarwin [
-          apple_sdk.frameworks.Security
         ];
 
-        crateInfo = builtins.fromTOML builtins.readFile ./Cargo.toml;
+        crateInfo = builtins.fromTOML (builtins.readFile ./Cargo.toml);
 
         projectCrate = rustPlatform.buildRustPackage {
-          inherit (crateInfo.package) name info;
+          inherit (crateInfo.package) name description;
 
           src = ./.;
 
@@ -51,11 +47,16 @@
         };
       in
       {
-        defaultPackage = projectCrate;
+        _module.args.pkgs = import nixpkgs {
+          inherit system;
+          overlays = [ 
+            (import rust-overlay)
+          ];
+        };
 
-        formatter = pkgs.nixpkgs-fmt;
+        packages.default = projectCrate;
 
-        devShell = pkgs.mkShell {
+        devShells.default = pkgs.mkShell {
           nativeBuildInputs = nativeBuildInputs;
 
           buildInputs = buildInputs ++ [
@@ -70,6 +71,6 @@
           ];
           
         };
-      }
-    );
+      };
+  };
 }
