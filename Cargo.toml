@@ -1,6 +1,6 @@
 [package]
 name = "keyps"
-description = "Provision authorized_keys file via HTTP/GitHub/GitLab"
+description = "Provision authorized_keys from HTTPS/GitHub/GitLab and automatically keep them up to date"
 version = "0.1.0"
 edition = "2021"
 

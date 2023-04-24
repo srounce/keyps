@@ -86,6 +86,7 @@
             programs.nixpkgs-fmt.enable = true;
             programs.rustfmt.enable = true;
             programs.rustfmt.package = rustVersion;
+            programs.prettier.enable = true;
           };
         };
     };
