@@ -20,6 +20,8 @@
           lib = pkgs.lib;
           stdenv = pkgs.stdenv;
 
+          apple_sdk = pkgs.darwin.apple_sdk_11_0;
+
           rustVersion = pkgs.rust-bin.stable.latest.default.override {
             extensions = [ "rust-src" "rustfmt" "rust-analyzer" ];
           };
@@ -35,6 +37,8 @@
 
           buildInputs = [
             pkgs.openssl
+          ] ++ lib.optionals stdenv.isDarwin [
+            apple_sdk.frameworks.Security
           ];
 
           crateInfo = builtins.fromTOML (builtins.readFile ./Cargo.toml);
