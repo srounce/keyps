@@ -103,7 +103,7 @@ fn run(args: Args) -> Result<(), ApplicationError> {
         .into_iter()
         .filter(|s| matches!(s, SourceIdentifier::Invalid(_)))
         .collect::<Vec<_>>();
-    if invalid_sources.is_empty() {
+    if !invalid_sources.is_empty() {
         return Err(ApplicationError::InvalidSources {
             sources: invalid_sources,
         });
