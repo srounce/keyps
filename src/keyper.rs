@@ -92,20 +92,7 @@ impl KeyperService {
             .sources
             .iter()
             .flat_map(|source| {
-                let url: Url = match source {
-                    SourceIdentifier::GitHub { username } => {
-                        format!("https://github.com/{username}.keys")
-                            .parse()
-                            .unwrap()
-                    }
-                    SourceIdentifier::GitLab { username } => {
-                        format!("https://gitlab.com/{username}.keys")
-                            .parse()
-                            .unwrap()
-                    }
-                    SourceIdentifier::Http { address } => address.clone(),
-                    _ => unreachable!(),
-                };
+                let url: Url = source.into();
                 let response = reqwest::blocking::get(url).unwrap();
                 let body = response.text().unwrap();
 

@@ -46,3 +46,24 @@ impl Display for SourceIdentifier {
         }
     }
 }
+
+impl From<&SourceIdentifier> for Url {
+    fn from(value: &SourceIdentifier) -> Url {
+        let url: Url = match value {
+            SourceIdentifier::GitHub { username } => format!("https://github.com/{username}.keys")
+                .parse()
+                .unwrap(),
+            SourceIdentifier::GitLab { username } => format!("https://gitlab.com/{username}.keys")
+                .parse()
+                .unwrap(),
+            SourceIdentifier::SourceHut { username } => {
+                format!("https://meta.sr.ht/~{username}.keys")
+                    .parse()
+                    .unwrap()
+            }
+            SourceIdentifier::Http { address } => address.clone(),
+            _ => unreachable!(),
+        };
+        url
+    }
+}
