@@ -5,7 +5,7 @@ use keyps::{
     source::SourceIdentifier,
 };
 use log::{debug, error, info};
-use std::{env, fs, path::PathBuf, process};
+use std::{env, path::PathBuf, process};
 
 #[derive(Debug, Parser)]
 #[command(author, version, about)]
@@ -70,14 +70,11 @@ impl ApplicationError {
 fn main() {
     let args = Args::parse();
 
-    match run(args) {
+    if let Err(err) = run(args) {
         // TODO: Better error message output/formatting
-        Err(e) => {
-            error!("{}", e.to_string());
-            process::exit(1)
-        }
-        _ => {}
-    };
+        error!("{}", err.to_string());
+        process::exit(1)
+    }
 }
 
 fn run(args: Args) -> Result<(), ApplicationError> {
@@ -88,11 +85,12 @@ fn run(args: Args) -> Result<(), ApplicationError> {
             2 => log::LevelFilter::Warn,
             3 => log::LevelFilter::Info,
             4 => log::LevelFilter::Debug,
-            5 | _ => log::LevelFilter::Trace,
+            5 => log::LevelFilter::Trace,
+            _ => log::LevelFilter::Info,
         })
         .init();
 
-    if args.sources.len() == 0 {
+    if args.sources.is_empty() {
         return Err(ApplicationError::NoSources);
     }
 
@@ -103,12 +101,9 @@ fn run(args: Args) -> Result<(), ApplicationError> {
         .sources
         .clone()
         .into_iter()
-        .filter(|s| match s {
-            SourceIdentifier::Invalid(_) => true,
-            _ => false,
-        })
+        .filter(|s| matches!(s, SourceIdentifier::Invalid(_)))
         .collect::<Vec<_>>();
-    if invalid_sources.len() > 0 {
+    if invalid_sources.is_empty() {
         return Err(ApplicationError::InvalidSources {
             sources: invalid_sources,
         });
@@ -119,7 +114,7 @@ fn run(args: Args) -> Result<(), ApplicationError> {
             .canonicalize()
             .map_err(|_| ApplicationError::AuthorizedKeysNotFound { path }),
         None => env::current_dir()
-            .map_err(|err| ApplicationError::unknown(err))
+            .map_err(ApplicationError::unknown)
             .and_then(|path| find_up(path, ".ssh/authorized_keys")),
     }?;
 
@@ -140,7 +135,7 @@ fn run(args: Args) -> Result<(), ApplicationError> {
         use signal_hook::consts::signal::*;
         use signal_hook::iterator::Signals;
 
-        Signals::new(&[SIGHUP, SIGTERM, SIGINT, SIGQUIT]).map_err(ApplicationError::unknown)
+        Signals::new([SIGHUP, SIGTERM, SIGINT, SIGQUIT]).map_err(ApplicationError::unknown)
     }?;
 
     let service = Keyper::start(KeyperConfig {

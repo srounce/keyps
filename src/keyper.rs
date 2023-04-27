@@ -91,7 +91,7 @@ impl KeyperService {
             .config
             .sources
             .iter()
-            .map(|source| {
+            .flat_map(|source| {
                 let url: Url = match source {
                     SourceIdentifier::GitHub { username } => {
                         format!("https://github.com/{username}.keys")
@@ -113,7 +113,6 @@ impl KeyperService {
 
                 lines.into_iter()
             })
-            .flatten()
             .unique()
             .collect::<Vec<_>>();
 
@@ -131,9 +130,9 @@ impl KeyperService {
             .lines()
             .filter(|line| {
                 let prev = skip_lines;
-                skip_lines = match line {
-                    &"# keyps: START" => true,
-                    &"# keyps: END" => false,
+                skip_lines = match *line {
+                    "# keyps: START" => true,
+                    "# keyps: END" => false,
                     _ => skip_lines,
                 };
 
@@ -149,7 +148,7 @@ impl KeyperService {
     }
 }
 
-fn upsert_keys(file_path: &PathBuf, keys: &Vec<String>) -> Result<(), ()> {
+fn upsert_keys(file_path: &PathBuf, keys: &[String]) -> Result<(), ()> {
     let authorized_keys = fs::read_to_string(file_path).map_err(|_| {
         todo!("handle key update failure");
     })?;
@@ -159,9 +158,9 @@ fn upsert_keys(file_path: &PathBuf, keys: &Vec<String>) -> Result<(), ()> {
         .lines()
         .filter(|line| {
             let prev = skip_lines;
-            skip_lines = match line {
-                &"# keyps: START" => true,
-                &"# keyps: END" => false,
+            skip_lines = match *line {
+                "# keyps: START" => true,
+                "# keyps: END" => false,
                 _ => skip_lines,
             };
 

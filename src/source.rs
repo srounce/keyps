@@ -12,7 +12,7 @@ pub enum SourceIdentifier {
 
 impl From<String> for SourceIdentifier {
     fn from(value: String) -> Self {
-        let mut value_parts = value.split_terminator(":");
+        let mut value_parts = value.split_terminator(':');
         let source_type = value_parts.next();
 
         // TODO: Make this less shit
