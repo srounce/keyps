@@ -7,6 +7,7 @@ pub enum SourceIdentifier {
     Invalid(String),
     GitHub { username: String },
     GitLab { username: String },
+    SourceHut { username: String },
     Http { address: Url },
 }
 
@@ -23,6 +24,9 @@ impl From<String> for SourceIdentifier {
             Some("gitlab") => Self::GitLab {
                 username: value_parts.next().unwrap().to_string(),
             },
+            Some("sourcehut") => Self::GitLab {
+                username: value_parts.next().unwrap().to_string(),
+            },
             Some("http" | "https") => Self::Http {
                 address: value.parse().unwrap(),
             },
@@ -37,6 +41,7 @@ impl Display for SourceIdentifier {
             Self::Invalid(value) => value.fmt(f),
             Self::GitHub { username } => f.write_fmt(format_args!("github:{username}")),
             Self::GitLab { username } => f.write_fmt(format_args!("gitlab:{username}")),
+            Self::SourceHut { username } => f.write_fmt(format_args!("sourcehut:{username}")),
             Self::Http { address } => f.write_str(address.as_str()),
         }
     }
