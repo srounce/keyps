@@ -24,7 +24,7 @@ impl From<String> for SourceIdentifier {
             Some("gitlab") => Self::GitLab {
                 username: value_parts.next().unwrap().to_string(),
             },
-            Some("sourcehut") => Self::GitLab {
+            Some("sourcehut") => Self::SourceHut {
                 username: value_parts.next().unwrap().to_string(),
             },
             Some("http" | "https") => Self::Http {
