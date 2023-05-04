@@ -15,7 +15,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: "Setup env"
-      uses: JRMurr/direnv-nix-action@v2
+      uses: JRMurr/direnv-nix-action@v4.1.0
     - run: nix flake check -L
     - name: Build
       run: cargo build --verbose
